@@ -1,23 +1,29 @@
 // go away, o shimmy canvas
 d();
 
-// 2048
-var doc = document, done = 0
-  , table = doc.createElement("table")
-  , side = 4
-  , cells = [], cell, tmp, i, j, k
-  , maxOrdinal = 12;
+/* 2048 */
+
+// variables
+var doc = document, table = doc.createElement("table")
+  , side = 4, cells = [], done = 0
+  , cell, tmp, i, j, k;
+
+// score stored here
 doc.title = 0;
-tmp = doc.createElement("meta");
-tmp.name = "viewport";
-tmp.content = "width=device-width,user-scalable=no";
-doc.head.appendChild(tmp);
+
+/* This won't not have any effect when viewed in frames anyway so comment it out for the js1k */
+// tmp = doc.createElement("meta");
+// tmp.name = "viewport";
+// tmp.content = "width=device-width,user-scalable=no";
+// doc.head.appendChild(tmp);
+
+// Build initial grid
 for (i=0; i++<side; ) {
   k = table.insertRow(0);
-  table.style.margin = "2em auto";
+  table.style.margin = "0 auto";
   for (j=0; j++<side;) {
     cells.push(cell = k.insertCell(0));
-    cell.style.width = cell.style.height = "2.3em";
+    cell.style.width = cell.style.height = "2.2em";
     cell.style.border = "solid #0d8";
     cell.style.textAlign = "center";
     cell.style.font = "bold 2em Arial";
@@ -29,42 +35,44 @@ for (i=0; i++<side; ) {
   }
 }
 b.appendChild(table);
+addRandom();addRandom();
 
+// set color of a cell (i) from its value j
 function setBackground(i, j, k) {
   i.style.background = j ? (
-      k = 255 - (128*((+j).toString(2).length/maxOrdinal)) | 0
+      k = 255 - (128*((+j).toString(2).length/12)) | 0
       , "rgb(" + [240, k+j*3, k] + ")"
     ) : "";
 }
 
-addRandom();addRandom(); // init board
-
-function addRandom(possibleCells) {
-  possibleCells = [];
-  for (i=0; cell = cells[i++]; ) cell.innerHTML || possibleCells.push(cell);
-  if (j=possibleCells.length)
-    setBackground(cell = possibleCells[(Math.random()*j)|0], cell.innerHTML = Math.random()<.9 ? 2 : 4);
+// find empty cell and add a tile
+function addRandom() {
+  tmp = [];
+  for (i=0; cell = cells[i++]; ) cell.innerHTML || tmp.push(cell);
+  if (j=tmp.length)
+    setBackground(cell = tmp[(Math.random()*j)|0], cell.innerHTML = Math.random()<.9 ? 2 : 4);
   else done = !alert(doc.title);
 }
 
-function move(dir, arr, next, v0, v1, mergedValue) {
-  if (!done & /^[1234]/.test(dir)) {
+// loop rows/cols in the proper direction and do move/merge/etc
+function move(dir, v0, v1, mergedValue) {
+  if (!done & /^[1234]$/.test(dir)) {
     for (i=0; i<side; ++i) {
-      for (j=0, arr=[]; j<side; ++j)
-        arr[j] = cells[/[13]/.test(dir)?(/[12]/.test(dir)?(i*side+side-j-1):(i*side+j)):(/[12]/.test(dir)?((side-j-1)*side+i):(i+side*j))];
-      for (k=1; k<arr.length;) {
-        next = k-1;
-        v1 = arr[k++].innerHTML;
-        while (arr[next] && !(v0 = arr[next].innerHTML)) {
-          arr[next+1].innerHTML = "";
-          setBackground(arr[next+1]);
-          arr[next].innerHTML = v1;
-          setBackground(arr[next--], v1);
+      for (j=0, tmp=[]; j<side; ++j)
+        tmp[j] = cells[/[13]/.test(dir)?(/[12]/.test(dir)?(i*side+side-j-1):(i*side+j)):(/[12]/.test(dir)?((side-j-1)*side+i):(i+side*j))];
+      for (k=1; k<tmp.length;) {
+        cell = k-1;
+        v1 = tmp[k++].innerHTML;
+        while (tmp[cell] && !(v0 = tmp[cell].innerHTML)) {
+          tmp[cell+1].innerHTML = "";
+          setBackground(tmp[cell+1]);
+          tmp[cell].innerHTML = v1;
+          setBackground(tmp[cell--], v1);
         }
         v1 && v0==v1 && (
-          setBackground(arr[next], arr[next].innerHTML = mergedValue=v1*2)
-          , setBackground(arr[next+1])
-          , arr[next+1].innerHTML = arr[next] = ""
+          setBackground(tmp[cell], tmp[cell].innerHTML = mergedValue=v1*2)
+          , setBackground(tmp[cell+1])
+          , tmp[cell+1].innerHTML = tmp[cell] = ""
           , done || (done = mergedValue==2048)
           , doc.title -= -mergedValue
         );
