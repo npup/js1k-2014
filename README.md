@@ -1,7 +1,7 @@
 js1k-2014
 =========
 
-This is my js1k entry of 2014. It is a version of the popular "2048" game, in 1020 bytes.
+This is my js1k entry of 2014. It is a version of the popular "2048" game, in 938 bytes.
 
 Move tiles 
 
